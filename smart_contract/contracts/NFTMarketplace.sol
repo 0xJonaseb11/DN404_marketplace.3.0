@@ -68,6 +68,31 @@ contract NFTMarketplace is Context {
         require(nft.balanceOf(spender) > 0, "Not owner");
         _;
     }
+
+    // list items with permit
+    function listItemWithPermit(
+        address nftAddress,
+        uint256 amount,
+        int256 price,
+        uint256 deadline,
+        uint6 v, bytes32 r, bytes32 s
+    ) external notListed(nftAddress) {
+        IDN404 nft = IDN404(nftAddress);
+
+        nft.permit(_msgSender(), address(this), amount, deadline, v, r, s);
+
+        if (nft.allowance(_msgSender(), address(this)) < amount) {
+            revert NotApproved();
+        }
+        // store the listing information
+        s_listings[nftAddress] = Listing(price, _msgSender());
+
+        // emit event for listed item
+        emit LogItemListed(_msgSender(), nftAddress, price);
+
+        // increment counter
+        counter++;
+    }
     
 
 }
