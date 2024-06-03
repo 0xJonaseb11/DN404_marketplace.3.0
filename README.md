@@ -17,6 +17,19 @@ _The ERC404 token is a unique token that combines both ERC20 and ERC721 token fe
 
 ### Getting started
 
+This project demonstrates a basic Hardhat use case to implement the full business logic of an ERC404 token standard.
+
+Try running some of the following tasks:
+
+```shell
+npm install --force
+npx hardhat help
+npx hardhat test
+REPORT_GAS=true npx hardhat test
+npx hardhat node
+npx hardhat run scripts/deploy.js
+```
+
 -----------------------
 
 @0xJonaseb11

@@ -156,12 +156,4 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
     function getURI() public view returns(string memory) {
         return _baseURI;
     }
-
-
-
-
-    
-
-
-
 }
