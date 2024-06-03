@@ -93,24 +93,37 @@ contract NFTMarketplace is Context {
         // increment counter - listings
         counter++;
     }
-
+    
+    // initialize cancel listing functionality
     function cancelListing(address nftAddress) external isOwner(
         nftAddress, _msgSender()) isListed(nftAddress) {
             delete s_listings[nftAddress];
             emit LogItemCanceled(_msgSender(), nftAddress);
     }
-
+    
+    // initialize buy nft item functionality
     function buyItem(address nftAddress, uint256 fraction) external payable isListed(nftAddress) {
         Listing memory listedItem = s_listings[nftAddress];
         require(msg.value >= listedItem.price, "Price not met");
 
         s_proceeds[listedItem].seller += msg.value;
         delete s_listings[nftAddress];
-        // transfer earnings
+        // transfer fraction from `listedItem.seller` to the buyer
         IDN404(nftAddress).transferFrom(listedItem.seller, _msgSender(), fraction);
         // emit log item bought event
         emit LogItemBought(_msgSender(), nftAddress, listedItem.price, fraction);
+    }
 
+    // initialize withdraw earnings(proceeds) functinality
+    function withdrawProceeds() external {
+        uint256 proceeds = s_proceeds[_msgSender()];
+        require(proceeds > 0, "No proceeds found");
+        // update state to avoid reentrancy
+        s_proceeds[_msgSender()] = 0;
+
+        // safe withdraw
+        (bool success, ) = payable(_msgSender()).call{value: proceeds}("");
+        require(success, "Transfer failed");
     }
 
 
