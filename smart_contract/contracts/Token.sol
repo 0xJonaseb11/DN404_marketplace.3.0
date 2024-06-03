@@ -78,4 +78,20 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
         _mint(msg.sender, amount);
     }
 
+    // initialize the allowlistMint functionality
+    function allowlistMint(uint256 amount, bytes32[] calldata proof) public payable 
+    isValidMint(allowlistPrice, amount) {
+        if (
+            !MerkleProofLib.verifyCallData(
+                proof, allowlistRoot, keccak256(abi.encodePacked(msg.sender))
+            )
+           ) {
+                revert InvalidProof();
+            }
+            unchecked {
+                +numMinted;
+            }
+            _mint(msg.sender, amount);
+    }
+
 }
