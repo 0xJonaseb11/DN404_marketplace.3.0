@@ -107,7 +107,11 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
 
     // initialize the toggle live functionality
     function toggleLive() public onlyOwner {
-        live = !live
+        if (live) {
+            live = false;
+        } else {
+            live = true;
+        }
     }
 
     // initialize withdraw functionality
