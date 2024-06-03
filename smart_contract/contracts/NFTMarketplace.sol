@@ -75,7 +75,7 @@ contract NFTMarketplace is Context {
         uint256 amount,
         int256 price,
         uint256 deadline,
-        uint6 v, bytes32 r, bytes32 s
+        uint8 v, bytes32 r, bytes32 s
     ) external notListed(nftAddress) {
         IDN404 nft = IDN404(nftAddress);
 

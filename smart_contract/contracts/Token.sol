@@ -2,16 +2,12 @@
 pragma solidity ^0.8.19;
 
 import { DN404 } from "./lib/DN404.sol";
-// Import DN404Mirror contract from external sources
 import { DN404Mirror } from "dn404/src/DN404Mirror.sol";
-// import Ownable contract from solady library
 import { Ownable } from "solady/src/auth/Ownable.sol";
-// import LibString contract from solady library
 import { LibString } from "solady/src/utils/LibString.sol";
-// import SafeTransferLib contract from solady library
 import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
-// Import merkleProofLib contract from solady library
 import { MerkleProofLib } from "solady/src/utils/MerkleProofLib.sol";
+// import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 
 contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
@@ -63,14 +59,14 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
         _name = name_;
         _symbol = symbol_;
         MAX_SUPPLY = _MAX_SUPPLY;
-        publiPrice = publicPrice_;
+        publicPrice = publicPrice_;
 
         address mirror = address(new DN404Mirror(msg.sender));
         _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
     }
 
     // initialize minting functionality
-    function mint(uint256 amount) isValidMint(publicPrice, amount) {
+    function mint(uint256 amount) isValidMint(publicPrice, amount) public{
         // uncheck overflows
         unchecked {
             ++numMinted;
@@ -95,7 +91,7 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
     }
 
     // initialize token SetBaseurl()
-    function setBaseUrl(string baseURI_) public onlyOwner {
+    function setBaseUrl(string calldata baseURI_) public onlyOwner {
         _baseURI = baseURI_;
     }
 
@@ -115,7 +111,7 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
     }
 
     // initialize withdraw functionality
-    function withdraw() {
+    function withdraw() external {
         SafeTransferLib.safeTransferAllETH(msg.sender);
     }
 
