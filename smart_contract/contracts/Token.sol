@@ -14,3 +14,25 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 import { MerkleProofLib } from "solady/src/utils/MerkleProofLib.sol";
 
 
+contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
+
+    // state varibles
+    string private _name;
+    string private _symbol;
+    string private _baseUrl;
+    bytes32 private allowlistRoot;
+    
+    uint120 public publicPrice;
+    uint120 public allowlistPrice;
+    bool public live;
+    uint256 public numMinted;
+    uint256 public _MAX_SUPPLY;
+
+    // Error handling
+    error InvalidProof();
+    error InvalidPrice();
+    error ExceedsMaxMint();
+    error TotalSupplyReached();
+    error NotAlive();
+
+}
