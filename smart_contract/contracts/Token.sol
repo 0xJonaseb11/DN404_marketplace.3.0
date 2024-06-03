@@ -26,13 +26,47 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
     uint120 public allowlistPrice;
     bool public live;
     uint256 public numMinted;
-    uint256 public _MAX_SUPPLY;
+    uint256 public MAX_SUPPLY;
 
     // Error handling
     error InvalidProof();
     error InvalidPrice();
     error ExceedsMaxMint();
     error TotalSupplyReached();
-    error NotAlive();
+    error NotLive();
+
+    // checks
+    modifier isValidMint(uint256 price, uint256 amount) {
+        if (!live) {
+            revert NotLive();
+        }
+        if (price * amount != msg.value) {
+            revert InvalidPrice();
+        }
+        if (numMinted + amount > MAX_SUPPLY) {
+            revert TotalSupplyReached();
+        }
+        _;
+    }
+
+    // contract init with constructor
+    constructor (
+        string memory name_,
+        string memory symbol_,
+        uint256 _MAX_SUPPLY,
+        uint120 publicPrice_,
+        uint96 initialTokenSupply,
+        address initialSupplyOwner
+    ) ERC20Permit("NFTMintDN404") {
+        _initializeOwner(msg.sender);
+
+        _name = name_;
+        _symbol = symbol_;
+        MAX_SUPPLY = _MAX_SUPPLY;
+        publiPrice = publicPrice_;
+
+        address mirror = address(new DN404Mirror(msg.sender));
+        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
+    }
 
 }
