@@ -44,7 +44,9 @@ const runMain = async() => {
     await main();
     process.exit(0);
   } catch(err) {
-    console.error(err);
+    console.error("Error deploying Token contract", err);
     process.exit(1);
   }
 }
+
+runMain();
