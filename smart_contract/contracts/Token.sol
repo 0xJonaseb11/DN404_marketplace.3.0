@@ -19,7 +19,7 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
     // state varibles
     string private _name;
     string private _symbol;
-    string private _baseUrl;
+    string private _baseURI;
     bytes32 private allowlistRoot;
     
     uint120 public publicPrice;
@@ -71,7 +71,7 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
 
     // initialize minting functionality
     function mint(uint256 amount) isValidMint(publicPrice, amount) {
-        // uncheck overflow and underflow
+        // uncheck overflows
         unchecked {
             ++numMinted;
         }
@@ -93,5 +93,23 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
             }
             _mint(msg.sender, amount);
     }
+
+    // initialize token SetBaseurl()
+    function setBaseUrl(string baseURI_) public onlyOwner {
+        _baseURI = baseURI_;
+    }
+
+    // inititialize  set prices functinality
+    function setPrices(uint120 publicPrice_, uint120 allowlistPrice_) public onlyOwner {
+        publicPrice = publicPrice_;
+        allowlistPrice = allowlistPrice_;
+    }
+
+    // initialize the toggle live functionality
+    function toggleLive() public onlyOwner {
+        live = !live
+    }
+
+
 
 }
