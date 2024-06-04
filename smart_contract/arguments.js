@@ -1,6 +1,7 @@
 module.exports = [
   "Meta",
   "Meta",
+  "https://example.com/metadata/",
   "50000000000000000000",
   "0",
   "0",

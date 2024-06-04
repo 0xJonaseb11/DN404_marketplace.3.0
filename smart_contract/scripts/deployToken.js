@@ -5,6 +5,7 @@ const main = async() => {
   const [deployer] = await ethers.getSigners();
   const name = "Meta";
   const symbol = "Meta";
+  const uri = "https://example.com/metadata/";
   const maxSupply = ethers.parseEther("50");
   const publicPrice = ethers.parseEther("0");
   const initialTokenSupply = ethers.parseEther("0");
@@ -13,6 +14,7 @@ const main = async() => {
   const argumentsArray = [
     name, 
     symbol, 
+    uri,
     maxSupply.toString(), 
     publicPrice.toString(), 
     initialTokenSupply.toString(), 
@@ -27,16 +29,29 @@ const main = async() => {
   console.log("Deploying contract with account:", deployer.address);
 
   const Token = await ethers.getContractFactory("NFTMintDN404");
-    const token = await Token.deploy(
-      name,
-      symbol,
-      maxSupply,
-      publicPrice,
-      initialTokenSupply,
-      signer
-    );
+  const token = await Token.deploy(
+    name,
+    symbol,
+    uri,
+    maxSupply,
+    publicPrice,
+    initialTokenSupply,
+    signer
+  );
 
-    console.log("Fractionalized NFT deployed to:", await token.getAddress());
+  console.log("Fractionalized NFT deployed to:", await token.getAddress());
+
+  // Get the base URI
+  const baseURI = await token.baseURI();
+  console.log("Contract Metadata URI:", baseURI);
+
+  // Save the contract address and base URI to a file
+  const contractInfo = {
+    address: await token.getAddress(),
+    baseURI: baseURI
+  };
+  fs.writeFileSync("contract-info.json", JSON.stringify(contractInfo, null, 2));
+  console.log("Contract information saved to contract-info.json");
 }
 
 const runMain = async() => {
