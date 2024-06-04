@@ -20,7 +20,7 @@ module.exports = {
       hardfork: "berlin",
     },
     sepolia: {
-      url: "https://eth-sepolia.g.alchemy.com/v2/qZFTwEtghVmUO0U2AEEPldBA7w_9d6D0",
+      url: process.env.SEPOLIA_RPC_URL,
       accounts: privateKey(),
     }
   },
