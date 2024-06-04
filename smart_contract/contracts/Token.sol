@@ -131,6 +131,8 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable{
         allowlistPrice = allowlistPrice_;
     }
 
+
+    // utilities
     function nftTotalSupply() public view returns (uint256) {
         return _totalNFTSupply();
     }

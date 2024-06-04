@@ -26,7 +26,7 @@ const main = async() => {
 
   console.log("Deploying contract with account:", deployer.address);
 
-  const Token = await ethers.getContractFactory("NFTMintDN404";
+  const Token = await ethers.getContractFactory("NFTMintDN404");
     const token = await Token.deploy(
       name,
       symbol,
