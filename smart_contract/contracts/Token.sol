@@ -1,37 +1,32 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.4;
 
-import { DN404 } from "./lib/DN404.sol";
-import { DN404Mirror } from "dn404/src/DN404Mirror.sol";
-import { Ownable } from "solady/src/auth/Ownable.sol";
-import { LibString } from "solady/src/utils/LibString.sol";
-import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
-import { MerkleProofLib } from "solady/src/utils/MerkleProofLib.sol";
-// import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import "./lib/DN404.sol";
+import "dn404/src/DN404Mirror.sol";
+import {Ownable} from "solady/src/auth/Ownable.sol";
+import {LibString} from "solady/src/utils/LibString.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {MerkleProofLib} from "solady/src/utils/MerkleProofLib.sol";
 
 
-contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
 
-    // state varibles
+contract NFTMintDN404 is DN404, ERC20Permit, Ownable{
     string private _name;
     string private _symbol;
     string private _baseURI;
     bytes32 private allowlistRoot;
-    
-    uint120 public publicPrice;
-    uint120 public allowlistPrice;
+    uint256 public publicPrice;
+    uint256 public allowlistPrice;
     bool public live;
     uint256 public numMinted;
     uint256 public MAX_SUPPLY;
 
-    // Error handling
     error InvalidProof();
     error InvalidPrice();
     error ExceedsMaxMint();
     error TotalSupplyReached();
     error NotLive();
 
-    // checks
     modifier isValidMint(uint256 price, uint256 amount) {
         if (!live) {
             revert NotLive();
@@ -45,110 +40,107 @@ contract NFTMintDN404 is DN404, ERC20Permit, Ownable {
         _;
     }
 
-    // contract init with constructor
-    constructor (
+    constructor(
         string memory name_,
         string memory symbol_,
+        string memory uri_,
         uint256 _MAX_SUPPLY,
-        uint120 publicPrice_,
-        uint96 initialTokenSupply,
-        address initialSupplyOwner
-    ) ERC20Permit("NFTMintDN404") {
-        _initializeOwner(msg.sender);
+        uint256 publicPrice_,
+        uint256 initialTokenSupply,
+        address _owner
+    ) ERC20Permit("ERC404Token") {
+        _initializeOwner(_owner);
 
         _name = name_;
         _symbol = symbol_;
         MAX_SUPPLY = _MAX_SUPPLY;
         publicPrice = publicPrice_;
+        _baseURI = uri_;
+        live = true;
 
         address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
+        _initializeDN404(initialTokenSupply, _owner, mirror);
     }
 
-    // initialize minting functionality
-    function mint(uint256 amount) isValidMint(publicPrice, amount) public{
-        // uncheck overflows
+    function mint(uint256 amount) public payable isValidMint(publicPrice, amount) {
         unchecked {
             ++numMinted;
         }
         _mint(msg.sender, amount);
     }
 
-    // initialize the allowlistMint functionality
-    function allowlistMint(uint256 amount, bytes32[] calldata proof) public payable 
-    isValidMint(allowlistPrice, amount) {
+    function allowlistMint(uint256 amount, bytes32[] calldata proof)
+        public
+        payable
+        isValidMint(allowlistPrice, amount)
+    {
         if (
-            !MerkleProofLib.verifyCallData(
+            !MerkleProofLib.verifyCalldata(
                 proof, allowlistRoot, keccak256(abi.encodePacked(msg.sender))
             )
-           ) {
-                revert InvalidProof();
-            }
-            unchecked {
-                ++numMinted;
-            }
-            _mint(msg.sender, amount);
+        ) {
+            revert InvalidProof();
+        }
+        unchecked {
+            ++numMinted;
+        }
+        _mint(msg.sender, amount);
     }
 
-    // initialize token SetBaseurl()
-    function setBaseUrl(string calldata baseURI_) public onlyOwner {
+    function setBaseURI(string calldata baseURI_) public onlyOwner {
         _baseURI = baseURI_;
     }
 
-    // inititialize  set prices functinality
-    function setPrices(uint120 publicPrice_, uint120 allowlistPrice_) public onlyOwner {
+    function setPrices(uint256 publicPrice_, uint256 allowlistPrice_) public onlyOwner {
         publicPrice = publicPrice_;
         allowlistPrice = allowlistPrice_;
     }
 
-    // initialize the toggle live functionality
     function toggleLive() public onlyOwner {
-        if (live) {
-            live = false;
+        if (live)
+        {
+           live = false;
         } else {
-            live = true;
+           live = true;
         }
     }
 
-    // initialize withdraw functionality
-    function withdraw() external {
+    function withdraw() public onlyOwner {
         SafeTransferLib.safeTransferAllETH(msg.sender);
     }
 
-    // retrieving the basic information
-    function name() public view override returns(string memory) {
+    function name() public view override returns (string memory) {
         return _name;
     }
 
-    function symbol() public view returns(string memory) {
+    function symbol() public view override returns (string memory) {
         return _symbol;
     }
 
-    // initialize tokenURI functionality - token metadata
-    function tokenURI(uint256 tokenId) public view override returns(string memory result) {
+    function tokenURI(uint256 tokenId) public view override returns (string memory result) {
         if (bytes(_baseURI).length != 0) {
             result = string(abi.encodePacked(_baseURI, LibString.toString(tokenId)));
-        } /*else {
-            revert();
-        } */
+        }
     }
 
-    // initialize allowlist mamagement functionality
     function setAllowlist(bytes32 allowlistRoot_) public onlyOwner {
         allowlistRoot = allowlistRoot_;
     }
 
-    // initialize utility functions
-    function nftTotalSupply() public view returns(uint256) {
-        return _totalNFTSupply;
+    function setAllowlistPrice(uint256 allowlistPrice_) public onlyOwner {
+        allowlistPrice = allowlistPrice_;
     }
 
-    function nftBalanceOf(address owner) public view returns(uint256) {
+    function nftTotalSupply() public view returns (uint256) {
+        return _totalNFTSupply();
+    }
+
+    function nftbalanceOf(address owner) public view returns (uint256) {
         return _balanceOfNFT(owner);
     }
 
-    function previewNextTokenId() public view returns(uint256) {
-        return _nextTokenId;
+    function previewNextTokenId() public view returns (uint256) {
+        return _nextTokenId(); 
     }
 
     function getURI() public view returns(string memory) {
